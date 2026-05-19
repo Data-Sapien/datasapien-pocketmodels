@@ -13,9 +13,12 @@ see **<https://datasapien.com/pricing/>**.
 
 ```mermaid
 flowchart TB
-    User([User])
+    Dev([Orchestrator Admin])
+    User([App User])
 
-    subgraph App["Pocket Models app (this repo)"]
+    Orch[DataSapien Orchestrator<br/>web portal · Journeys · AI Models · MeData Definitions]
+
+    subgraph App["Pocket Models app"]
         UI[Flutter UI<br/>screens · widgets]
         VM[ViewModels &amp; Services]
     end
@@ -31,7 +34,10 @@ flowchart TB
         Store[(MeData<br/>DataVault)]
     end
 
-    Backend[(DataSapien backend<br/>auth · model catalog · journey definitions)]
+    Backend[(DataSapien backend<br/>auth · AI Models · Journeys · MeData Definitions)]
+
+    Dev -->|configures| Orch
+    Orch -.->|publishes| Backend
 
     User <--> UI
     UI <--> VM
@@ -40,14 +46,15 @@ flowchart TB
     VM -->|runJourney · syncJourneys| Jou
     Int <--> Model
     Me <--> Store
-    Int -.->|catalog metadata| Backend
-    Jou -.->|definitions| Backend
+    Backend -.->|AI Models · Journeys · MeData Definitions| SDK
 ```
 
-The UI talks to ViewModels, which call into the three DataSapien SDK services.
-Inference and personal data stay on the device — only the **model catalog** and
-**journey definitions** are fetched from the DataSapien backend (over an
-authenticated connection).
+The diagram has two halves. **Config-time** (dashed): an Orchestrator Admin
+uses the **DataSapien Orchestrator** (web portal) to publish Journeys,
+register AI Models, and define MeData schemas — those flow into the
+DataSapien backend, which the SDK pulls from at runtime. **Runtime**
+(solid): the app's UI talks to ViewModels, which call into the three
+DataSapien SDK services. Inference and personal data stay on the device.
 
 ---
 
