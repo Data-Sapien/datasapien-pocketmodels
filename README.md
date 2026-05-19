@@ -9,6 +9,46 @@ This repository contains the host-app source code. The DataSapien SDK itself
 is a commercial product and requires a subscription —
 see **<https://datasapien.com/pricing/>**.
 
+## How it works
+
+```mermaid
+flowchart TB
+    User([User])
+
+    subgraph App["Pocket Models app (this repo)"]
+        UI[Flutter UI<br/>screens · widgets]
+        VM[ViewModels &amp; Services]
+    end
+
+    subgraph SDK["DataSapien SDK"]
+        Int[IntelligenceService]
+        Me[MeDataService]
+        Jou[JourneyService]
+    end
+
+    subgraph Device["On-device — never leaves the phone"]
+        Model[(LLM weights<br/>GGUF)]
+        Store[(MeData<br/>DataVault)]
+    end
+
+    Backend[(DataSapien backend<br/>auth · model catalog · journey definitions)]
+
+    User <--> UI
+    UI <--> VM
+    VM -->|invokeModel · loadModel| Int
+    VM -->|read · write personal data| Me
+    VM -->|runJourney · syncJourneys| Jou
+    Int <--> Model
+    Me <--> Store
+    Int -.->|catalog metadata| Backend
+    Jou -.->|definitions| Backend
+```
+
+The UI talks to ViewModels, which call into the three DataSapien SDK services.
+Inference and personal data stay on the device — only the **model catalog** and
+**journey definitions** are fetched from the DataSapien backend (over an
+authenticated connection).
+
 ---
 
 ## Table of contents
