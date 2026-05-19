@@ -2,7 +2,7 @@
 
 Flutter source code for **Pocket Models** — a privacy-first, on-device AI assistant
 built on the [DataSapien](https://datasapien.com/) SDK. Run local LLMs against
-your own personal data ("Me Data") on your phone, without sending anything to
+your own personal data ("MeData") on your phone, without sending anything to
 the cloud.
 
 This repository contains the host-app source code. The DataSapien SDK itself
@@ -112,7 +112,6 @@ On-device model management and inference.
 | Method | What it does | Used in |
 |---|---|---|
 | `getManagedAIModels()` | Returns the full list of models registered for the tenant (downloadable catalog). | [lib/services/model_selector_source.dart](lib/services/model_selector_source.dart) |
-| `saveManagedAIModel(...)` | Registers a new managed model (e.g. a user-supplied Hugging Face GGUF). | [lib/services/hugging_face_service.dart](lib/services/hugging_face_service.dart) |
 | `getDownloadedModelsList()` | Lists models whose weights are already on disk. | [lib/services/model_download_manager.dart](lib/services/model_download_manager.dart) |
 | `isModelFilesDownloaded(modelKey)` | True if every weight file for the given model is present locally. | [lib/services/model_download_manager.dart](lib/services/model_download_manager.dart) |
 | `loadModel(modelKey)` | Loads the model into memory ready for inference. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
@@ -122,16 +121,16 @@ On-device model management and inference.
 
 ### MeDataService — `DataSapien.getMeDataService()`
 
-The user's local "Me Data" store — categorized personal data the on-device
+The user's local "MeData" store — categorized personal data the on-device
 model can read at inference time. Everything stays on the device.
 
 | Method | What it does | Used in |
 |---|---|---|
 | `getMeDataCategories()` | Returns top-level categories (e.g. Health, Personalization, Identity). | [lib/services/me_data_category_loader.dart](lib/services/me_data_category_loader.dart) |
-| `getMeDataDefinitions()` | Returns every defined Me Data key and its schema. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
+| `getMeDataDefinitions()` | Returns every defined MeData key and its schema. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
 | `getMeDataDefinitionsByCategory(category)` | Definitions filtered to one category. | [lib/screens/profile/my_data_tab.dart](lib/screens/profile/my_data_tab.dart) |
 | `getMeDataDefinition(key)` | Single-key lookup. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
-| `getMeDataRecords(key)` | All stored values for a given Me Data key (history). | [lib/screens/profile/my_data_history_screen.dart](lib/screens/profile/my_data_history_screen.dart) |
+| `getMeDataRecords(key)` | All stored values for a given MeData key (history). | [lib/screens/profile/my_data_history_screen.dart](lib/screens/profile/my_data_history_screen.dart) |
 | `getLastMeDataRecord(key)` | The most recently stored value for a key. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
 | `saveMeDataRecord(key, value)` | Persists a new value (creates a new history entry). | [lib/services/settings_manager.dart](lib/services/settings_manager.dart) |
 | `deleteMeData(key)` | Deletes all records for a key. | [lib/screens/profile/my_data_tab.dart](lib/screens/profile/my_data_tab.dart) |
@@ -140,7 +139,7 @@ model can read at inference time. Everything stays on the device.
 ### JourneyService — `DataSapien.getJourneyService()`
 
 Journeys are server-defined JS workflows that run on-device and produce
-Me Data outputs (e.g. an onboarding sequence that fills in baseline data).
+MeData outputs (e.g. an onboarding sequence that fills in baseline data).
 
 | Method | What it does | Used in |
 |---|---|---|
@@ -173,7 +172,7 @@ flutter pub get
 flutter run
 ```
 
-The app will start, but **inference and Me Data calls will fail until you
+The app will start, but **inference and MeData calls will fail until you
 replace the `YOUR_*` placeholders** in [`lib/main.dart`](lib/main.dart) and
 [`lib/utils/app_constants.dart`](lib/utils/app_constants.dart) with real
 DataSapien credentials.
