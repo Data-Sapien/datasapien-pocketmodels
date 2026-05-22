@@ -158,13 +158,15 @@ On-device model management and inference.
 
 | Method | What it does | Used in |
 |---|---|---|
-| `getManagedAIModels()` | Returns the full list of models registered for the tenant (downloadable catalog). | [lib/services/model_selector_source.dart](lib/services/model_selector_source.dart) |
-| `getDownloadedModelsList()` | Lists models whose weights are already on disk. | [lib/services/model_download_manager.dart](lib/services/model_download_manager.dart) |
-| `isModelFilesDownloaded(modelKey)` | True if every weight file for the given model is present locally. | [lib/services/model_download_manager.dart](lib/services/model_download_manager.dart) |
-| `loadModel(modelKey)` | Loads the model into memory ready for inference. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
-| `unloadModel(modelKey)` | Frees model memory. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
-| `invokeModel(modelKey, prompts, {inferenceParams})` | Runs an inference. Returns the generated string; streaming callbacks emit per-token. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
-| `stopModelInference(modelKey)` | Cancels an in-flight inference. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
+| `getManagedAIModels()` | Returns the full list of models registered for the tenant (downloadable catalog). Each entry has `name`, `multimodal`, `imageUrl`, etc. | [lib/services/model_selector_source.dart](lib/services/model_selector_source.dart), [lib/services/model_download_manager.dart](lib/services/model_download_manager.dart) |
+| `getDownloadedModelsList()` | Lists names of models whose weights are already on disk. | [lib/services/model_download_manager.dart](lib/services/model_download_manager.dart) |
+| `isModelFilesDownloaded(modelName)` | `true` if every weight file for the given model is present locally. | [lib/services/model_download_manager.dart](lib/services/model_download_manager.dart) |
+| `downloadModelFiles(modelName, {onProgress})` | Downloads the model weights. `onProgress: (double p)` is called repeatedly with `0.0`–`1.0`. | [lib/services/model_download_manager.dart](lib/services/model_download_manager.dart) |
+| `deleteModelFiles(modelName)` | Removes the model's weight files from disk. | [lib/services/model_download_manager.dart](lib/services/model_download_manager.dart) |
+| `loadModel(modelName, modelKey, {modelParams})` | Loads the model into memory under an arbitrary `modelKey` you choose. `modelParams` carries context size / GPU layers / etc. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
+| `unloadModel({key})` | Frees model memory for a previously loaded `modelKey`. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
+| `invokeModel(modelKey, prompts, {inferenceParams, onStream})` | Runs an inference against a loaded model. Returns the full generated string. If `onStream: (String chunk) { ... }` is supplied, it fires per-token while generating. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
+| `stopModelInference(modelKey)` | Cancels an in-flight `invokeModel` call for the given `modelKey`. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
 
 ### MeDataService — `DataSapien.getMeDataService()`
 
@@ -174,14 +176,14 @@ model can read at inference time. Everything stays on the device.
 | Method | What it does | Used in |
 |---|---|---|
 | `getMeDataCategories()` | Returns top-level categories (e.g. Health, Personalization, Identity). | [lib/services/me_data_category_loader.dart](lib/services/me_data_category_loader.dart) |
-| `getMeDataDefinitions()` | Returns every defined MeData key and its schema. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
-| `getMeDataDefinitionsByCategory(category)` | Definitions filtered to one category. | [lib/screens/profile/my_data_tab.dart](lib/screens/profile/my_data_tab.dart) |
-| `getMeDataDefinition(key)` | Single-key lookup. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
-| `getMeDataRecords(key)` | All stored values for a given MeData key (history). | [lib/screens/profile/my_data_history_screen.dart](lib/screens/profile/my_data_history_screen.dart) |
-| `getLastMeDataRecord(key)` | The most recently stored value for a key. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
-| `saveMeDataRecord(key, value)` | Persists a new value (creates a new history entry). | [lib/services/settings_manager.dart](lib/services/settings_manager.dart) |
-| `deleteMeData(key)` | Deletes all records for a key. | [lib/screens/profile/my_data_tab.dart](lib/screens/profile/my_data_tab.dart) |
-| `deleteMeDataRecord(...)` | Deletes one history entry. | [lib/screens/profile/my_data_history_screen.dart](lib/screens/profile/my_data_history_screen.dart) |
+| `getMeDataDefinitions()` | Returns every defined MeData key and its schema. | [lib/screens/settings/data_privacy_screen.dart](lib/screens/settings/data_privacy_screen.dart) |
+| `getMeDataDefinitionsByCategory(categoryName)` | Definitions filtered to one category. | [lib/services/me_data_category_loader.dart](lib/services/me_data_category_loader.dart) |
+| `getMeDataDefinition(definitionName)` | Single-definition lookup. Returns `null` if the definition isn't known. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
+| `getMeDataRecords(definitionName)` | All stored values for a given MeData definition (history, newest-last). | [lib/services/me_data_category_loader.dart](lib/services/me_data_category_loader.dart) |
+| `getLastMeDataRecord(definitionName)` | The most recently stored value for a definition. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
+| `saveMeDataRecord(definitionName, value)` | Persists a new value (appends a new history entry). | [lib/theme/theme_manager.dart](lib/theme/theme_manager.dart), [lib/screens/settings/memory_settings_screen.dart](lib/screens/settings/memory_settings_screen.dart) |
+| `deleteMeData(definitionName)` | Deletes **every** record for a definition. | [lib/screens/profile/my_data_tab.dart](lib/screens/profile/my_data_tab.dart) |
+| `deleteMeDataRecord(definitionName, recordId)` | Deletes one specific history entry by its record ID. | [lib/screens/profile/my_data_history_screen.dart](lib/screens/profile/my_data_history_screen.dart) |
 
 ### JourneyService — `DataSapien.getJourneyService()`
 
@@ -190,9 +192,9 @@ MeData outputs (e.g. an onboarding sequence that fills in baseline data).
 
 | Method | What it does | Used in |
 |---|---|---|
-| `getJourneys()` | Lists journeys available to the user. | [lib/screens/profile/journeys_tab.dart](lib/screens/profile/journeys_tab.dart) |
-| `runJourney(id)` | Executes a journey end-to-end. | [lib/screens/profile/journeys_tab.dart](lib/screens/profile/journeys_tab.dart) |
-| `syncJourneys()` | Pulls latest journey definitions and refreshes derived data. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
+| `getJourneys({tags, statuses, onlyInAudience})` | Lists journeys available to the user, filterable by `tags` (e.g. `['ai']`), `statuses` (`JourneyStatus.notStarted`, `.completed`, …), and `onlyInAudience: true` to hide journeys the user doesn't qualify for. | [lib/screens/profile/journeys_tab.dart](lib/screens/profile/journeys_tab.dart), [lib/screens/chat/main_chat_screen.dart](lib/screens/chat/main_chat_screen.dart) |
+| `runJourney(journeyName, {data})` | Executes a journey by name. `data` is a `Map<String, dynamic>` of inputs the journey script may consume. | [lib/screens/profile/journeys_tab.dart](lib/screens/profile/journeys_tab.dart) |
+| `syncJourneys()` | Re-pulls the latest journey definitions from the backend and re-evaluates derived MeData. Call after any MeData mutation that may unlock new journeys. | [lib/viewmodels/main_chat_view_model.dart](lib/viewmodels/main_chat_view_model.dart) |
 
 ### Diagnostics
 
